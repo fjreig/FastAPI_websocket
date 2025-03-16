@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends Chat Room</title>
+    <style>
+    </style>
+</head>
+<body>
+    <h1>Friends Chat Room</h1>
+    <div class="top-right">
+        <input id="nameInput" type="text" placeholder="Enter your name" />
+        <button onclick="setName()">Set Name</button>
+    </div>
+    <ul id="messages"></ul>
+    <div class="message-input">
+        <input id="messageInput" type="text" placeholder="Type a message..." disabled />
+        <button onclick="sendMessage()" disabled>Send</button>
+    </div>
+
+    <script>
+        let websocket;
+        let userName = '';
+        const clientId = Math.floor(Math.random() * 1000);
+
+        function setName() {
+            const nameInput = document.getElementById('nameInput');
+            userName = nameInput.value;
+            if (userName) {
+                nameInput.disabled = true;
+                document.getElementById('messageInput').disabled = false;
+                document.querySelector('button[onclick="sendMessage()"').disabled = false;
+                websocket = new WebSocket(`ws://localhost:8000/ws/${userName}/${clientId}`);
+                websocket.onmessage = function(event) {
+                    const messages = document.getElementById('messages');
+                    const message = document.createElement('li');
+                    const isUserMessage = event.data.startsWith(`${userName}:`);
+                    message.className = isUserMessage ? 'user-message' : 'other-message';
+                    message.textContent = event.data;
+                    messages.appendChild(message);
+                    messages.scrollTop = messages.scrollHeight;
+                };
+                websocket.send(`${userName} connected.`);
+            }
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            websocket.send(messageInput.value);
+            messageInput.value = '';
+        }
+    </script>
+</body>
+</html>
