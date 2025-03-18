@@ -1,7 +1,7 @@
 services:
   api:
     container_name: api
-    image: frreimon/api:2.6
+    image: frreimon/api:2.8
     restart: always
     ports:
       - "8000:8000"
